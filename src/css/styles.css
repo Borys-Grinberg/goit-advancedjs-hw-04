@@ -19,7 +19,7 @@ body {
 .gallery {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 20px;
     justify-content: center;
     width: 100%;
 }
@@ -28,7 +28,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    max-width: calc((100% - 3 * 40px) / 4);
+    max-width: calc((100% - 3 * 20px) / 4);
     display: flex;
     background-color:whitesmoke;
    

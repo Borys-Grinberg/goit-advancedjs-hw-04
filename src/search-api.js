@@ -1,7 +1,6 @@
 import axios from 'axios';
-
-const BASE_URL = 'https://pixabay.com/api/';
 const PIXABAY_API_KEY = '37408613-d3e7a4c0184cf3ce3e63dcb61';
+const BASE_URL = 'https://pixabay.com/api/';
 
 const IMAGE_PARAM_TEMPLATE = {
   key: PIXABAY_API_KEY,
