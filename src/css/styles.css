@@ -6,10 +6,13 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 20px;
-    padding: 25px;
+    padding: 20px;
     margin-bottom: 20px;
     background-color:rgb(42, 40, 163);
+    
+}
+
+.btn {
     border-radius: 10%;
 }
 
@@ -25,15 +28,16 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 10px;
     max-width: calc((100% - 3 * 40px) / 4);
     display: flex;
     background-color:whitesmoke;
+   
+
     
 }
 
 .image {
-    object-fit: fill;
+    object-fit: fit;
     width: 100%;
     
 }
@@ -41,8 +45,9 @@ body {
 .info {
     display: flex;
     flex-wrap: wrap;
+    padding: 10px;
     font-size: 1vw;
-    align-items: center;
+    align-items: start;
     justify-content: space-between;
 
 }
