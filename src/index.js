@@ -1,15 +1,14 @@
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 import { findImages } from './search-api';
 
 const elements = {
   searchForm: document.querySelector('.search-form'),
   searchButton: document.querySelector('button[type="submit"]'),
   gallery: document.querySelector('.gallery'),
-  guard: document.querySelector('.js-guard'),
+  load: document.querySelector('.js-load'),
 };
 
 const PER_PAGE = 40;
@@ -140,7 +139,7 @@ function onSearchButtonClick(evt) {
     return;
   }
 
-  scrollObserver.unobserve(elements.guard);
+  scrollObserver.unobserve(elements.load);
   resetSearchData();
 
   searchQuery = userInput;
@@ -160,7 +159,7 @@ function onSearchButtonClick(evt) {
       renderSearchResult(result.data);
 
       if (PER_PAGE * currentPage < totalHits) {
-        scrollObserver.observe(elements.guard);
+        scrollObserver.observe(elements.load);
       }
     })
     .catch(err => showErrorMessage(err.message));
