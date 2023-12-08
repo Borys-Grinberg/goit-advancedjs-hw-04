@@ -1,3 +1,5 @@
+// search-api.js
+
 import axios from 'axios';
 const PIXABAY_API_KEY = '37408613-d3e7a4c0184cf3ce3e63dcb61';
 const BASE_URL = 'https://pixabay.com/api/';

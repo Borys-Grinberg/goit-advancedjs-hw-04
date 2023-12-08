@@ -6,7 +6,6 @@ import { findImages } from './search-api';
 
 const elements = {
   searchForm: document.querySelector('.search-form'),
-  searchButton: document.querySelector('button[type="submit"]'),
   gallery: document.querySelector('.gallery'),
   load: document.querySelector('.js-load'),
 };
@@ -25,29 +24,31 @@ let gallery = new SimpleLightbox('.gallery a', {
 const guardOptions = {
   root: null,
   rootMargin: '250px',
-  treshhold: 1.0,
+  threshold: 1.0,
 };
 
 const scrollObserver = new IntersectionObserver(handlerLoadMore, guardOptions);
 
-function handlerLoadMore(entries) {
-  entries.forEach(entry => {
+async function handlerLoadMore(entries) {
+  entries.forEach(async entry => {
     if (entry.isIntersecting) {
       currentPage += 1;
-      const searchResult = findImages(searchQuery, PER_PAGE, currentPage);
+      const searchResult = await findImages(searchQuery, PER_PAGE, currentPage);
 
-      searchResult
-        .then(result => {
-          renderSearchResult(result.data);
+      const totalPages = Math.ceil(totalHits / PER_PAGE);
+      const pagesArray = Array.from(
+        { length: totalPages },
+        (_, index) => index + 1
+      );
 
-          if (PER_PAGE * currentPage >= totalHits) {
-            scrollObserver.unobserve(elements.guard);
-            showMessage(
-              "We're sorry, but you've reached the end of search results."
-            );
-          }
-        })
-        .catch(err => showErrorMessage(err.message));
+      if (pagesArray.includes(currentPage)) {
+        renderSearchResult(searchResult.data);
+
+        if (currentPage === totalPages) {
+          scrollObserver.unobserve(elements.load);
+          showMessage("You've reached the end of search results.");
+        }
+      }
     }
   });
 }
@@ -65,34 +66,34 @@ function getListItemsHTML(hits) {
         downloads,
       }) => {
         return `            
-                <div class="photo-card">
-                    <a href="${largeImageURL}"><img class="image" src="${webformatURL}" alt="${tags}" loading="lazy" /></a>
-                    <div class="info">
-                        <p class="info-item">
-                            <b>Likes</b>
-                            <span>${likes}</span> 
-                        </p>
-                        <p class="info-item">
-                            <b>Views</b>
-                            <span>${views}</span>
-                        </p>
-                        <p class="info-item">
-                            <b>Comments</b>
-                            <span>${comments}</span>
-                        </p>
-                        <p class="info-item">
-                            <b>Downloads</b>
-                            <span>${downloads}</span>
-                        </p>
-                    </div>
-                </div>            
+          <div class="photo-card">
+            <a href="${largeImageURL}"><img class="image" src="${webformatURL}" alt="${tags}" loading="lazy" /></a>
+            <div class="info">
+              <p class="info-item">
+                <b>Likes</b>
+                <span>${likes}</span> 
+              </p>
+              <p class="info-item">
+                <b>Views</b>
+                <span>${views}</span>
+              </p>
+              <p class="info-item">
+                <b>Comments</b>
+                <span>${comments}</span>
+              </p>
+              <p class="info-item">
+                <b>Downloads</b>
+                <span>${downloads}</span>
+              </p>
+            </div>
+          </div>            
         `;
       }
     )
     .join('');
 }
 
-function renderSearchResult(data) {
+async function renderSearchResult(data) {
   elements.gallery.insertAdjacentHTML('beforeend', getListItemsHTML(data.hits));
   gallery.refresh();
 
@@ -129,13 +130,13 @@ function resetSearchData() {
   searchQuery = '';
 }
 
-function onSearchButtonClick(evt) {
+async function onSearchFormSubmit(evt) {
   evt.preventDefault();
   const form = new FormData(elements.searchForm);
   const userInput = form.get('searchQuery').trim().toLowerCase();
 
   if (!userInput) {
-    showErrorMessage('Search query must be not empty!');
+    showErrorMessage('Search query must not be empty!');
     return;
   }
 
@@ -143,26 +144,21 @@ function onSearchButtonClick(evt) {
   resetSearchData();
 
   searchQuery = userInput;
-  const searchResult = findImages(searchQuery, PER_PAGE);
+  const searchResult = await findImages(searchQuery, PER_PAGE);
 
-  searchResult
-    .then(result => {
-      if (result.data.hits.length === 0) {
-        throw new Error(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      }
+  if (searchResult.data.hits.length === 0) {
+    showErrorMessage('No images match your search query. Please try again.');
+    return;
+  }
 
-      totalHits = result.data.totalHits;
+  totalHits = searchResult.data.totalHits;
+  showMessage(`Hooray! We found ${totalHits} images.`);
+  renderSearchResult(searchResult.data);
 
-      showMessage(`Hooray! We found ${totalHits} images.`);
-      renderSearchResult(result.data);
-
-      if (PER_PAGE * currentPage < totalHits) {
-        scrollObserver.observe(elements.load);
-      }
-    })
-    .catch(err => showErrorMessage(err.message));
+  const totalPages = Math.ceil(totalHits / PER_PAGE);
+  if (PER_PAGE * currentPage < totalHits) {
+    scrollObserver.observe(elements.load);
+  }
 }
 
-elements.searchButton.addEventListener('click', onSearchButtonClick);
+elements.searchForm.addEventListener('submit', onSearchFormSubmit);
